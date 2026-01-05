@@ -8,14 +8,14 @@ import ru.yandex.practicum.grpc.telemetry.event.HubEventProto;
 import ru.yandex.practicum.smarthome.telemetry.collector.converter.AvroConverter;
 import ru.yandex.practicum.smarthome.telemetry.collector.converter.ProtoToModelConverter;
 import ru.yandex.practicum.smarthome.telemetry.collector.model.hub.DeviceRemovedEvent;
-import ru.yandex.practicum.smarthome.telemetry.collector.service.KafkaProducerService;
+import ru.yandex.practicum.smarthome.telemetry.collector.service.CollectorKafkaProducerService;
 
 @Slf4j
 @Service
 @RequiredArgsConstructor
 public class DeviceRemovedEventHandler implements HubEventHandler {
 
-    private final KafkaProducerService kafkaProducerService;
+    private final CollectorKafkaProducerService collectorKafkaProducerService;
     private final ProtoToModelConverter protoConverter;
     private final AvroConverter avroConverter;
 
@@ -32,7 +32,7 @@ public class DeviceRemovedEventHandler implements HubEventHandler {
             log.debug("Преобразовано в Java объект: {}", deviceRemovedEvent);
             SpecificRecord avroRecord = avroConverter.convertToAvro(deviceRemovedEvent);
             log.debug("Преобразовано в Avro запись");
-            kafkaProducerService.sendHubEvent(deviceRemovedEvent.getHubId(), avroRecord);
+            collectorKafkaProducerService.sendHubEvent(deviceRemovedEvent.getHubId(), avroRecord);
             log.info("Завершилась обработка события удаления устройства: hubId={}, deviceId={}",
                     event.getHubId(), deviceRemovedEvent.getId());
         } catch (Exception e) {

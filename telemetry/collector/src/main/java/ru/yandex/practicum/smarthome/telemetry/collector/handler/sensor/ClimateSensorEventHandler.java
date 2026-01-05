@@ -8,14 +8,14 @@ import ru.yandex.practicum.grpc.telemetry.event.SensorEventProto;
 import ru.yandex.practicum.smarthome.telemetry.collector.converter.AvroConverter;
 import ru.yandex.practicum.smarthome.telemetry.collector.converter.ProtoToModelConverter;
 import ru.yandex.practicum.smarthome.telemetry.collector.model.sensor.ClimateSensorEvent;
-import ru.yandex.practicum.smarthome.telemetry.collector.service.KafkaProducerService;
+import ru.yandex.practicum.smarthome.telemetry.collector.service.CollectorKafkaProducerService;
 
 @Slf4j
 @Service
 @RequiredArgsConstructor
 public class ClimateSensorEventHandler implements SensorEventHandler {
 
-    private final KafkaProducerService kafkaProducerService;
+    private final CollectorKafkaProducerService collectorKafkaProducerService;
     private final ProtoToModelConverter protoConverter;
     private final AvroConverter avroConverter;
 
@@ -32,7 +32,7 @@ public class ClimateSensorEventHandler implements SensorEventHandler {
             log.debug("Преобразовано в Java объект: {}", climateSensorEvent);
             SpecificRecord avroRecord = avroConverter.convertToAvro(climateSensorEvent);
             log.debug("Преобразовано в Avro запись");
-            kafkaProducerService.sendSensorEvent(climateSensorEvent.getHubId(), avroRecord);
+            collectorKafkaProducerService.sendSensorEvent(climateSensorEvent.getHubId(), avroRecord);
             log.info("Завершилась обработка события климатического датчика: hubId={}, sensorId={}",
                     event.getHubId(), climateSensorEvent.getId());
         } catch (Exception e) {
