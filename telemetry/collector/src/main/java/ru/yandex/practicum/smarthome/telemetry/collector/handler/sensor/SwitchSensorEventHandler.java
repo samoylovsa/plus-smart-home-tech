@@ -8,14 +8,14 @@ import ru.yandex.practicum.grpc.telemetry.event.SensorEventProto;
 import ru.yandex.practicum.smarthome.telemetry.collector.converter.AvroConverter;
 import ru.yandex.practicum.smarthome.telemetry.collector.converter.ProtoToModelConverter;
 import ru.yandex.practicum.smarthome.telemetry.collector.model.sensor.SwitchSensorEvent;
-import ru.yandex.practicum.smarthome.telemetry.collector.service.KafkaProducerService;
+import ru.yandex.practicum.smarthome.telemetry.collector.service.CollectorKafkaProducerService;
 
 @Slf4j
 @Service
 @RequiredArgsConstructor
 public class SwitchSensorEventHandler implements SensorEventHandler {
 
-    private final KafkaProducerService kafkaProducerService;
+    private final CollectorKafkaProducerService collectorKafkaProducerService;
     private final ProtoToModelConverter protoConverter;
     private final AvroConverter avroConverter;
 
@@ -32,7 +32,7 @@ public class SwitchSensorEventHandler implements SensorEventHandler {
             log.debug("Преобразовано в Java объект: {}", switchSensorEvent);
             SpecificRecord avroRecord = avroConverter.convertToAvro(switchSensorEvent);
             log.debug("Преобразовано в Avro запись");
-            kafkaProducerService.sendSensorEvent(switchSensorEvent.getHubId(), avroRecord);
+            collectorKafkaProducerService.sendSensorEvent(switchSensorEvent.getHubId(), avroRecord);
             log.info("Завершилась обработка события датчика переключателя: hubId={}, sensorId={}",
                     event.getHubId(), switchSensorEvent.getId());
         } catch (Exception e) {

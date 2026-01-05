@@ -8,14 +8,14 @@ import ru.yandex.practicum.grpc.telemetry.event.HubEventProto;
 import ru.yandex.practicum.smarthome.telemetry.collector.converter.AvroConverter;
 import ru.yandex.practicum.smarthome.telemetry.collector.converter.ProtoToModelConverter;
 import ru.yandex.practicum.smarthome.telemetry.collector.model.hub.ScenarioAddedEvent;
-import ru.yandex.practicum.smarthome.telemetry.collector.service.KafkaProducerService;
+import ru.yandex.practicum.smarthome.telemetry.collector.service.CollectorKafkaProducerService;
 
 @Slf4j
 @Service
 @RequiredArgsConstructor
 public class ScenarioAddedEventHandler implements HubEventHandler {
 
-    private final KafkaProducerService kafkaProducerService;
+    private final CollectorKafkaProducerService collectorKafkaProducerService;
     private final ProtoToModelConverter protoConverter;
     private final AvroConverter avroConverter;
 
@@ -32,7 +32,7 @@ public class ScenarioAddedEventHandler implements HubEventHandler {
             log.debug("Преобразовано в Java объект: {}", scenarioAddedEvent);
             SpecificRecord avroRecord = avroConverter.convertToAvro(scenarioAddedEvent);
             log.debug("Преобразовано в Avro запись");
-            kafkaProducerService.sendHubEvent(scenarioAddedEvent.getHubId(), avroRecord);
+            collectorKafkaProducerService.sendHubEvent(scenarioAddedEvent.getHubId(), avroRecord);
             log.info("Завершилась обработка события добавления сценария: hubId={}, scenario name={}",
                     event.getHubId(), scenarioAddedEvent.getName());
         } catch (Exception e) {

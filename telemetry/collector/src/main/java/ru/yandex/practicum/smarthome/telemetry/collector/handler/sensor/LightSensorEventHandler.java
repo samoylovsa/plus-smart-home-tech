@@ -8,14 +8,14 @@ import ru.yandex.practicum.grpc.telemetry.event.SensorEventProto;
 import ru.yandex.practicum.smarthome.telemetry.collector.converter.AvroConverter;
 import ru.yandex.practicum.smarthome.telemetry.collector.converter.ProtoToModelConverter;
 import ru.yandex.practicum.smarthome.telemetry.collector.model.sensor.LightSensorEvent;
-import ru.yandex.practicum.smarthome.telemetry.collector.service.KafkaProducerService;
+import ru.yandex.practicum.smarthome.telemetry.collector.service.CollectorKafkaProducerService;
 
 @Slf4j
 @Service
 @RequiredArgsConstructor
 public class LightSensorEventHandler implements SensorEventHandler {
 
-    private final KafkaProducerService kafkaProducerService;
+    private final CollectorKafkaProducerService collectorKafkaProducerService;
     private final ProtoToModelConverter protoConverter;
     private final AvroConverter avroConverter;
 
@@ -32,7 +32,7 @@ public class LightSensorEventHandler implements SensorEventHandler {
             log.debug("Преобразовано в Java объект: {}", lightSensorEvent);
             SpecificRecord avroRecord = avroConverter.convertToAvro(lightSensorEvent);
             log.debug("Преобразовано в Avro запись");
-            kafkaProducerService.sendSensorEvent(lightSensorEvent.getHubId(), avroRecord);
+            collectorKafkaProducerService.sendSensorEvent(lightSensorEvent.getHubId(), avroRecord);
             log.info("Завершилась обработка события датчика света: hubId={}, sensorId={}",
                     event.getHubId(), lightSensorEvent.getId());
         } catch (Exception e) {
