@@ -89,7 +89,7 @@ public class AggregatorKafkaProducerService {
         }
     }
 
-    public void close() {  // ← ДОБАВИТЬ
+    public void close() {
         if (producer != null) {
             try {
                 producer.close();
