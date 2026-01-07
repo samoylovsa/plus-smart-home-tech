@@ -1,4 +1,4 @@
-package ru.yandex.practicum.smarthome.telemetry.aggregator.deserializer;
+package ru.yandex.practicum.deserializer;
 
 import org.apache.avro.Schema;
 import org.apache.avro.io.DatumReader;
