@@ -5,6 +5,7 @@ import io.grpc.ManagedChannelBuilder;
 import io.grpc.StatusRuntimeException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.grpc.telemetry.event.ActionTypeProto;
 import ru.yandex.practicum.grpc.telemetry.event.DeviceActionProto;
@@ -14,6 +15,7 @@ import ru.yandex.practicum.smarthome.telemetry.analyzer.entity.ActionType;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
+import java.net.URI;
 
 @Slf4j
 @Service
@@ -23,19 +25,47 @@ public class GrpcClientService {
     private ManagedChannel channel;
     private HubRouterControllerGrpc.HubRouterControllerBlockingStub hubRouterClient;
 
+    @Value("${grpc.client.hub-router.address}")
+    private String grpcAddress;
+
+    @Value("${grpc.client.hub-router.enable-keep-alive:true}")
+    private boolean enableKeepAlive;
+
+    @Value("${grpc.client.hub-router.keep-alive-without-calls:true}")
+    private boolean keepAliveWithoutCalls;
+
+    @Value("${grpc.client.hub-router.negotiation-type:plaintext}")
+    private String negotiationType;
+
     @PostConstruct
     public void init() {
-        channel = ManagedChannelBuilder.forAddress("localhost", 59090)
-                .usePlaintext()
-                .build();
-        hubRouterClient = HubRouterControllerGrpc.newBlockingStub(channel);
-        log.info("gRPC client initialized for Hub Router on port 59090");
+        try {
+            URI uri = new URI(grpcAddress);
+            String host = uri.getHost();
+            int port = uri.getPort();
+            ManagedChannelBuilder<?> channelBuilder = ManagedChannelBuilder
+                    .forAddress(host, port);
+            if ("plaintext".equalsIgnoreCase(negotiationType)) {
+                channelBuilder.usePlaintext();
+            }
+            if (enableKeepAlive) {
+                channelBuilder.keepAliveWithoutCalls(keepAliveWithoutCalls);
+            }
+            channel = channelBuilder.build();
+            hubRouterClient = HubRouterControllerGrpc.newBlockingStub(channel);
+            log.info("gRPC client initialized for Hub Router on {}:{} (negotiation: {}, keepalive: {})",
+                    host, port, negotiationType, enableKeepAlive);
+        } catch (Exception e) {
+            log.error("Failed to initialize gRPC client", e);
+            throw new RuntimeException("Failed to initialize gRPC client", e);
+        }
     }
 
     @PreDestroy
     public void shutdown() {
         if (channel != null && !channel.isShutdown()) {
             channel.shutdown();
+            log.debug("gRPC channel shutdown completed");
         }
     }
 
