@@ -1,8 +1,8 @@
 package ru.yandex.practicum.smarthome.telemetry.analyzer.service;
 
+import com.google.protobuf.Timestamp;
 import io.grpc.ManagedChannel;
 import io.grpc.ManagedChannelBuilder;
-import io.grpc.StatusRuntimeException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -53,8 +53,8 @@ public class GrpcClientService {
             }
             channel = channelBuilder.build();
             hubRouterClient = HubRouterControllerGrpc.newBlockingStub(channel);
-            log.info("gRPC client initialized for Hub Router on {}:{} (negotiation: {}, keepalive: {})",
-                    host, port, negotiationType, enableKeepAlive);
+            log.info("gRPC client initialized for Hub Router on {}:{}",
+                    host, port);
         } catch (Exception e) {
             log.error("Failed to initialize gRPC client", e);
             throw new RuntimeException("Failed to initialize gRPC client", e);
@@ -72,37 +72,59 @@ public class GrpcClientService {
     public void sendDeviceAction(String hubId, String scenarioName, String sensorId,
                                  ActionType actionType, Integer value, long timestamp) {
         try {
-            DeviceActionProto.Builder actionBuilder = DeviceActionProto.newBuilder()
-                    .setSensorId(sensorId)
-                    .setType(convertActionType(actionType));
-            if (value != null) {
-                actionBuilder.setValue(value);
-            }
-            DeviceActionRequest request = DeviceActionRequest.newBuilder()
-                    .setHubId(hubId)
-                    .setScenarioName(scenarioName)
-                    .setAction(actionBuilder.build())
-                    .setTimestamp(com.google.protobuf.Timestamp.newBuilder()
-                            .setSeconds(timestamp / 1000)
-                            .setNanos((int) ((timestamp % 1000) * 1_000_000))
-                            .build())
-                    .build();
-
+            DeviceActionRequest request = buildDeviceActionRequest(
+                    hubId,
+                    scenarioName,
+                    sensorId,
+                    actionType,
+                    value,
+                    timestamp
+            );
             hubRouterClient.handleDeviceAction(request);
-            log.debug("Sent action to hub {} for scenario {}", hubId, scenarioName);
-        } catch (StatusRuntimeException e) {
-            log.error("Failed to send action to hub {}: gRPC error - {}", hubId, e.getStatus(), e);
         } catch (Exception e) {
-            log.error("Failed to send action to hub {}: {}", hubId, e.getMessage(), e);
+            log.error("Unexpected error sending action to hub {}: {} - sensor={}, action={}",
+                    hubId, e.getMessage(), sensorId, actionType, e);
         }
     }
 
+    private DeviceActionRequest buildDeviceActionRequest(String hubId, String scenarioName,
+                                                         String sensorId, ActionType actionType,
+                                                         Integer value, long timestamp) {
+        DeviceActionProto.Builder actionBuilder = DeviceActionProto.newBuilder()
+                .setSensorId(sensorId)
+                .setType(convertActionType(actionType));
+        if (value != null) {
+            actionBuilder.setValue(value);
+        }
+        Timestamp protoTimestamp = convertTimestamp(timestamp);
+        return DeviceActionRequest.newBuilder()
+                .setHubId(hubId)
+                .setScenarioName(scenarioName)
+                .setAction(actionBuilder.build())
+                .setTimestamp(protoTimestamp)
+                .build();
+    }
+
+    private Timestamp convertTimestamp(long timestamp) {
+        long seconds = timestamp / 1000;
+        int nanos = (int) ((timestamp % 1000) * 1_000_000);
+        return Timestamp.newBuilder()
+                .setSeconds(seconds)
+                .setNanos(nanos)
+                .build();
+    }
+
     private ActionTypeProto convertActionType(ActionType actionType) {
-        return switch (actionType) {
-            case ACTIVATE -> ActionTypeProto.ACTIVATE;
-            case DEACTIVATE -> ActionTypeProto.DEACTIVATE;
-            case INVERSE -> ActionTypeProto.INVERSE;
-            case SET_VALUE -> ActionTypeProto.SET_VALUE;
-        };
+        try {
+            return switch (actionType) {
+                case ACTIVATE -> ActionTypeProto.ACTIVATE;
+                case DEACTIVATE -> ActionTypeProto.DEACTIVATE;
+                case INVERSE -> ActionTypeProto.INVERSE;
+                case SET_VALUE -> ActionTypeProto.SET_VALUE;
+            };
+        } catch (IllegalArgumentException e) {
+            log.error("Unknown ActionType: {}", actionType, e);
+            throw new IllegalArgumentException("Unknown ActionType: " + actionType, e);
+        }
     }
 }
