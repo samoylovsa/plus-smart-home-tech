@@ -27,13 +27,13 @@ public class AggregationStarter {
 
     private KafkaConsumer<String, SensorEventAvro> consumer;
 
-    @Value("${kafka.bootstrap.servers:localhost:9092}")
+    @Value("${kafka.bootstrap-servers}")
     private String bootstrapServers;
 
-    @Value("${kafka.topics.sensors:telemetry.sensors.v1}")
+    @Value("${kafka.topics.sensors}")
     private String sensorTopic;
 
-    @Value("${kafka.consumer.group-id:smart-home-aggregator}")
+    @Value("${kafka.consumer.group-id}")
     private String groupId;
 
     private final SnapshotAggregatorService snapshotAggregatorService;
@@ -81,7 +81,6 @@ public class AggregationStarter {
             } finally {
                 log.info("Closing consumer");
                 consumer.close();
-                log.info("Aggregator service stopped");
                 aggregatorKafkaProducerService.close();
                 log.info("Aggregator service stopped");
             }
