@@ -71,7 +71,7 @@ public class AggregationStarter {
                 }
             }
         } catch (WakeupException ignored) {
-
+            log.info("AggregationStarter woken up, shutting down...");
         } catch (Exception e) {
             log.error("Error during sensor events processing", e);
         } finally {
