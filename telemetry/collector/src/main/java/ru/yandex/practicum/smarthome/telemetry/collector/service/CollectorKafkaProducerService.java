@@ -26,13 +26,13 @@ public class CollectorKafkaProducerService {
 
     private KafkaProducer<String, byte[]> producer;
 
-    @Value("${kafka.bootstrap.servers:localhost:9092}")
+    @Value("${kafka.bootstrap-servers}")
     private String bootstrapServers;
 
-    @Value("${kafka.topics.sensors:telemetry.sensors.v1}")
+    @Value("${kafka.topics.sensors}")
     private String sensorTopic;
 
-    @Value("${kafka.topics.hubs:telemetry.hubs.v1}")
+    @Value("${kafka.topics.hubs}")
     private String hubTopic;
 
     @PostConstruct
