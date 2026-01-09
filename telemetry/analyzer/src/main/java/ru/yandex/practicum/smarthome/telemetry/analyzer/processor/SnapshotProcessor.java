@@ -27,13 +27,13 @@ public class SnapshotProcessor {
 
     private KafkaConsumer<String, SensorsSnapshotAvro> consumer;
 
-    @Value("${kafka.bootstrap.servers:localhost:9092}")
+    @Value("${kafka.bootstrap-servers}")
     private String bootstrapServers;
 
-    @Value("${kafka.topics.snapshots:telemetry.snapshots.v1}")
+    @Value("${kafka.topics.snapshots}")
     private String snapshotTopic;
 
-    @Value("${kafka.consumer.snapshot-group-id:smart-home-analyzer-snapshot}")
+    @Value("${kafka.consumer.snapshot-group-id}")
     private String groupId;
 
     private final ScenarioActionService scenarioActionService;
