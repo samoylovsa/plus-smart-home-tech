@@ -28,13 +28,13 @@ public class HubEventProcessor implements Runnable {
 
     private KafkaConsumer<String, HubEventAvro> consumer;
 
-    @Value("${kafka.bootstrap.servers:localhost:9092}")
+    @Value("${kafka.bootstrap-servers}")
     private String bootstrapServers;
 
-    @Value("${kafka.topics.hubs:telemetry.hubs.v1}")
+    @Value("${kafka.topics.hubs}")
     private String hubTopic;
 
-    @Value("${kafka.consumer.hub-group-id:smart-home-analyzer-hub}")
+    @Value("${kafka.consumer.hub-group-id}")
     private String groupId;
 
     private final ScenarioService scenarioService;
