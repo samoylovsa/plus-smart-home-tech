@@ -28,13 +28,13 @@ public class GrpcClientService {
     @Value("${grpc.client.hub-router.address}")
     private String grpcAddress;
 
-    @Value("${grpc.client.hub-router.enable-keep-alive:true}")
+    @Value("${grpc.client.hub-router.enableKeepAlive}")
     private boolean enableKeepAlive;
 
-    @Value("${grpc.client.hub-router.keep-alive-without-calls:true}")
+    @Value("${grpc.client.hub-router.keepAliveWithoutCalls}")
     private boolean keepAliveWithoutCalls;
 
-    @Value("${grpc.client.hub-router.negotiation-type:plaintext}")
+    @Value("${grpc.client.hub-router.negotiationType}")
     private String negotiationType;
 
     @PostConstruct
