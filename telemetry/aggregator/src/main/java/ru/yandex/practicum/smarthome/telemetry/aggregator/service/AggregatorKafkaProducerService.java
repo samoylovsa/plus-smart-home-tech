@@ -29,10 +29,10 @@ public class AggregatorKafkaProducerService {
 
     private KafkaProducer<String, byte[]> producer;
 
-    @Value("${kafka.bootstrap.servers:localhost:9092}")
+    @Value("${kafka.bootstrap-servers}")
     private String bootstrapServers;
 
-    @Value("${kafka.topics.snapshots:telemetry.snapshots.v1}")
+    @Value("${kafka.topics.snapshots}")
     private String snapshotTopic;
 
     @PostConstruct
