@@ -1,9 +1,11 @@
-grpc:
-  server:
-    port: 59091
-
-kafka:
-  bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS:localhost:9092}
-  topics:
-    sensors: telemetry.sensors.v1
-    hubs: telemetry.hubs.v1
+spring:
+  application:
+    name: collector
+  cloud:
+    config:
+      fail-fast: true
+      retry:
+        useRandomPolicy: true
+        max-interval: 6000
+  config:
+    import: configserver:http://localhost:8888
