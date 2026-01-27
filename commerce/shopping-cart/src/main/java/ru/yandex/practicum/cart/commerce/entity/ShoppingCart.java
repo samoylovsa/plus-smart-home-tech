@@ -4,7 +4,6 @@ import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.hibernate.annotations.GenericGenerator;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -18,8 +17,7 @@ import java.util.UUID;
 public class ShoppingCart {
 
     @Id
-    @GeneratedValue(generator = "UUID")
-    @GenericGenerator(name = "UUID", strategy = "org.hibernate.id.UUIDGenerator")
+    @GeneratedValue(strategy = GenerationType.UUID)
     @Column(name = "shopping_cart_id", updatable = false, nullable = false)
     private UUID shoppingCartId;
 
