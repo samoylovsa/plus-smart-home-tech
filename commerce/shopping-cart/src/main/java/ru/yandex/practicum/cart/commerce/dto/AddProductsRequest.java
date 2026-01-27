@@ -1,20 +1,20 @@
 package ru.yandex.practicum.cart.commerce.dto;
 
+import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Positive;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.Map;
 import java.util.UUID;
 
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class ChangeProductQuantityRequest {
+public class AddProductsRequest {
 
-    @NotNull
-    private UUID productId;
-
-    @NotNull
-    private Long newQuantity;
+    @NotEmpty
+    private Map<@NotNull UUID, @NotNull @Positive Long> productQuantities;
 }
