@@ -7,6 +7,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import ru.yandex.practicum.store.commerce.dto.PageResponseDto;
 import ru.yandex.practicum.store.commerce.dto.ProductDto;
@@ -17,6 +18,7 @@ import ru.yandex.practicum.store.commerce.service.ShoppingStoreService;
 import java.util.UUID;
 
 @Slf4j
+@Validated
 @RestController
 @RequestMapping("/api/v1/shopping-store")
 @RequiredArgsConstructor
