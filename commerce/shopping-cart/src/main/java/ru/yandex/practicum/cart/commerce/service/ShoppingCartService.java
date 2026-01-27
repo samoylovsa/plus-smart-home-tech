@@ -17,6 +17,7 @@ import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
+@Transactional(readOnly = true)
 public class ShoppingCartService {
 
     private final ShoppingCartRepository shoppingCartRepository;
@@ -25,7 +26,10 @@ public class ShoppingCartService {
     public ShoppingCartDto getShoppingCart(String username) {
         ShoppingCart shoppingCart = shoppingCartRepository
                 .findByUsernameAndIsActiveTrue(username)
-                .orElseGet(() -> createNewShoppingCart(username));
+                .orElseThrow(() -> new NoProductsInShoppingCartException(
+                        "Корзина для пользователя '" + username + "' не найдена. " +
+                                "Добавьте сначала товары в корзину."
+                ));
         return shoppingCartMapper.toDto(shoppingCart);
     }
 
@@ -85,25 +89,6 @@ public class ShoppingCartService {
         shoppingCart.setProducts(currentProducts);
         ShoppingCart savedCart = shoppingCartRepository.save(shoppingCart);
         return shoppingCartMapper.toDto(savedCart);
-    }
-
-    private static Map<UUID, Long> getUuidLongMap(ChangeProductQuantityRequest request, ShoppingCart shoppingCart) {
-        Map<UUID, Long> currentProducts = shoppingCart.getProducts();
-
-        UUID productId = request.getProductId();
-        Long newQuantity = request.getNewQuantity();
-
-        if (!currentProducts.containsKey(productId)) {
-            throw new NoProductsInShoppingCartException(
-                    "Товар с ID " + productId + " не найден в корзине"
-            );
-        }
-        if (newQuantity <= 0) {
-            currentProducts.remove(productId);
-        } else {
-            currentProducts.put(productId, newQuantity);
-        }
-        return currentProducts;
     }
 
     @Transactional
