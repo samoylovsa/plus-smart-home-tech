@@ -8,6 +8,6 @@ import java.util.UUID;
 @ResponseStatus(HttpStatus.BAD_REQUEST)
 public class NoSpecifiedProductInWarehouseException extends RuntimeException {
     public NoSpecifiedProductInWarehouseException(UUID productId) {
-        super("Нет информации о товаре " + productId + " на складе");
+        super("No information about product " + productId + " in warehouse");
     }
 }
