@@ -8,6 +8,6 @@ import java.util.UUID;
 @ResponseStatus(HttpStatus.BAD_REQUEST)
 public class SpecifiedProductAlreadyInWarehouseException extends RuntimeException {
     public SpecifiedProductAlreadyInWarehouseException(UUID productId) {
-        super("Товар с ID " + productId + " уже зарегистрирован на складе");
+        super("Product with ID " + productId + " is already in warehouse");
     }
 }

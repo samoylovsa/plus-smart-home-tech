@@ -4,11 +4,11 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.yandex.practicum.warehouse.commerce.dto.*;
-import ru.yandex.practicum.warehouse.commerce.entity.Dimension;
 import ru.yandex.practicum.warehouse.commerce.entity.WarehouseProduct;
 import ru.yandex.practicum.warehouse.commerce.exception.NoSpecifiedProductInWarehouseException;
 import ru.yandex.practicum.warehouse.commerce.exception.ProductInShoppingCartLowQuantityInWarehouse;
 import ru.yandex.practicum.warehouse.commerce.exception.SpecifiedProductAlreadyInWarehouseException;
+import ru.yandex.practicum.warehouse.commerce.mapper.WarehouseMapper;
 import ru.yandex.practicum.warehouse.commerce.repository.WarehouseProductRepository;
 
 import java.security.SecureRandom;
@@ -20,39 +20,22 @@ import java.util.UUID;
 public class WarehouseService {
 
     private final WarehouseProductRepository repository;
+    private final WarehouseMapper mapper;
 
     private static final String[] ADDRESSES = new String[] {"ADDRESS_1", "ADDRESS_2"};
     private static final String CURRENT_ADDRESS = ADDRESSES[new SecureRandom().nextInt(ADDRESSES.length)];
 
     @Transactional
     public void addNewProduct(NewProductInWarehouseRequest request) {
-        UUID productId = request.getProductId();
-
-        if (repository.existsById(productId)) {
-            throw new SpecifiedProductAlreadyInWarehouseException(productId);
-        }
-
-        Dimension dimension = new Dimension();
-        dimension.setWidth(request.getDimension().getWidth());
-        dimension.setHeight(request.getDimension().getHeight());
-        dimension.setDepth(request.getDimension().getDepth());
-
-        WarehouseProduct product = new WarehouseProduct();
-        product.setProductId(productId);
-        product.setFragile(request.getFragile() != null ? request.getFragile() : false);
-        product.setDimension(dimension);
-        product.setWeight(request.getWeight());
-        product.setQuantity(0L);
-
+        validateProductNotExists(request.getProductId());
+        WarehouseProduct product = mapper.toEntity(request);
         repository.save(product);
     }
 
     @Transactional
     public void addProductQuantity(AddProductToWarehouseRequest request) {
         UUID productId = request.getProductId();
-        WarehouseProduct product = repository.findById(productId)
-                .orElseThrow(() -> new NoSpecifiedProductInWarehouseException(productId));
-
+        WarehouseProduct product = findProductByIdOrThrow(productId);
         product.addQuantity(request.getQuantity());
         repository.save(product);
     }
@@ -60,48 +43,83 @@ public class WarehouseService {
     @Transactional
     public BookedProductsDto checkAndReserveProducts(ShoppingCartDto shoppingCart) {
         Map<UUID, Integer> products = shoppingCart.getProducts();
+        validateProductsAvailability(products);
+        DeliveryCalculationResult calculation = calculateDeliveryDetails(products);
+        return new BookedProductsDto(
+                calculation.totalWeight(),
+                calculation.totalVolume(),
+                calculation.hasFragile()
+        );
+    }
 
-        // Проверяем доступность товаров
+    public AddressDto getWarehouseAddress() {
+        return AddressDto.builder()
+                .country(CURRENT_ADDRESS)
+                .city(CURRENT_ADDRESS)
+                .street(CURRENT_ADDRESS)
+                .house(CURRENT_ADDRESS)
+                .flat(CURRENT_ADDRESS)
+                .build();
+    }
+
+    private void validateProductNotExists(UUID productId) {
+        if (repository.existsById(productId)) {
+            throw new SpecifiedProductAlreadyInWarehouseException(productId);
+        }
+    }
+
+    private WarehouseProduct findProductByIdOrThrow(UUID productId) {
+        return repository.findById(productId)
+                .orElseThrow(() -> new NoSpecifiedProductInWarehouseException(productId));
+    }
+
+    private void validateProductsAvailability(Map<UUID, Integer> products) {
         for (Map.Entry<UUID, Integer> entry : products.entrySet()) {
             UUID productId = entry.getKey();
             Integer requestedQuantity = entry.getValue();
-
-            WarehouseProduct product = repository.findById(productId)
-                    .orElseThrow(() -> new NoSpecifiedProductInWarehouseException(productId));
-
-            if (product.getQuantity() < requestedQuantity) {
-                throw new ProductInShoppingCartLowQuantityInWarehouse(
-                        productId, requestedQuantity, product.getQuantity()
-                );
-            }
+            WarehouseProduct product = findProductByIdOrThrow(productId);
+            validateProductQuantity(product, requestedQuantity);
         }
+    }
 
-        // Рассчитываем характеристики доставки
-        Double totalWeight = 0.0;
-        Double totalVolume = 0.0;
-        Boolean hasFragile = false;
+    private void validateProductQuantity(WarehouseProduct product, Integer requestedQuantity) {
+        if (product.getQuantity() < requestedQuantity) {
+            throw new ProductInShoppingCartLowQuantityInWarehouse(
+                    product.getProductId(),
+                    requestedQuantity,
+                    product.getQuantity()
+            );
+        }
+    }
 
+    private DeliveryCalculationResult calculateDeliveryDetails(Map<UUID, Integer> products) {
+        double totalWeight = 0.0;
+        double totalVolume = 0.0;
+        boolean hasFragile = false;
         for (Map.Entry<UUID, Integer> entry : products.entrySet()) {
-            WarehouseProduct product = repository.findById(entry.getKey()).orElseThrow();
-
-            totalWeight += product.getWeight() * entry.getValue();
-            totalVolume += product.getDimension().getVolume() * entry.getValue();
-
+            UUID productId = entry.getKey();
+            Integer quantity = entry.getValue();
+            WarehouseProduct product = findProductByIdOrThrow(productId);
+            totalWeight += calculateItemWeight(product, quantity);
+            totalVolume += calculateItemVolume(product, quantity);
             if (product.getFragile()) {
                 hasFragile = true;
             }
         }
-
-        return new BookedProductsDto(totalWeight, totalVolume, hasFragile);
+        return new DeliveryCalculationResult(totalWeight, totalVolume, hasFragile);
     }
 
-    public AddressDto getWarehouseAddress() {
-        AddressDto address = new AddressDto();
-        address.setCountry(CURRENT_ADDRESS);
-        address.setCity(CURRENT_ADDRESS);
-        address.setStreet(CURRENT_ADDRESS);
-        address.setHouse(CURRENT_ADDRESS);
-        address.setFlat(CURRENT_ADDRESS);
-        return address;
+    private double calculateItemWeight(WarehouseProduct product, Integer quantity) {
+        return product.getWeight() * quantity;
     }
+
+    private double calculateItemVolume(WarehouseProduct product, Integer quantity) {
+        return product.getDimension().getVolume() * quantity;
+    }
+
+    private record DeliveryCalculationResult(
+            double totalWeight,
+            double totalVolume,
+            boolean hasFragile
+    ) {}
 }
