@@ -1,4 +1,4 @@
-package ru.yandex.practicum.store.commerce.dto;
+package ru.yandex.practicum.interaction.api.commerce.dto.shoppingStore;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import jakarta.validation.constraints.DecimalMin;
@@ -8,9 +8,6 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import ru.yandex.practicum.store.commerce.entity.enums.ProductCategory;
-import ru.yandex.practicum.store.commerce.entity.enums.ProductState;
-import ru.yandex.practicum.store.commerce.entity.enums.QuantityState;
 
 import java.math.BigDecimal;
 import java.util.UUID;

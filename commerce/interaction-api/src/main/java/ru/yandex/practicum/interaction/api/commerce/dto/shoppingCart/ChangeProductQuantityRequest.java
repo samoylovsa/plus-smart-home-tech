@@ -1,4 +1,4 @@
-package ru.yandex.practicum.warehouse.commerce.dto;
+package ru.yandex.practicum.interaction.api.commerce.dto.shoppingCart;
 
 import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
@@ -10,11 +10,11 @@ import java.util.UUID;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class AddProductToWarehouseRequest {
+public class ChangeProductQuantityRequest {
 
     @NotNull
     private UUID productId;
 
     @NotNull
-    private Long quantity;
+    private Long newQuantity;
 }

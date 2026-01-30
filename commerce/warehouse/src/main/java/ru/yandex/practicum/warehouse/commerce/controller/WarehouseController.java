@@ -5,7 +5,10 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import ru.yandex.practicum.warehouse.commerce.dto.*;
+import ru.yandex.practicum.interaction.api.commerce.dto.warehouse.AddProductToWarehouseRequest;
+import ru.yandex.practicum.interaction.api.commerce.dto.warehouse.AddressDto;
+import ru.yandex.practicum.interaction.api.commerce.dto.warehouse.BookedProductsDto;
+import ru.yandex.practicum.interaction.api.commerce.dto.warehouse.NewProductInWarehouseRequest;
 import ru.yandex.practicum.warehouse.commerce.service.WarehouseService;
 
 @Slf4j
@@ -36,7 +39,7 @@ public class WarehouseController {
 
     @PostMapping("/check")
     public ResponseEntity<BookedProductsDto> checkProductQuantityEnoughForShoppingCart(
-            @Valid @RequestBody ShoppingCartDto shoppingCart) {
+            @Valid @RequestBody ru.yandex.practicum.interaction.api.commerce.dto.warehouse.ShoppingCartDto shoppingCart) {
         log.info("POST /api/v1/warehouse/check");
         BookedProductsDto result = warehouseService.checkAndReserveProducts(shoppingCart);
         log.info("Products booked result: {} for shopping cart: {}", result, shoppingCart.getShoppingCartId());

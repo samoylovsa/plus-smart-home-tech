@@ -3,7 +3,7 @@ package ru.yandex.practicum.store.commerce.mapper;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.MappingTarget;
-import ru.yandex.practicum.store.commerce.dto.ProductDto;
+import ru.yandex.practicum.interaction.api.commerce.dto.shoppingStore.ProductDto;
 import ru.yandex.practicum.store.commerce.entity.Product;
 
 @Mapper(componentModel = "spring")

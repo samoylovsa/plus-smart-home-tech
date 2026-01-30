@@ -3,7 +3,10 @@ package ru.yandex.practicum.warehouse.commerce.service;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import ru.yandex.practicum.warehouse.commerce.dto.*;
+import ru.yandex.practicum.interaction.api.commerce.dto.warehouse.AddProductToWarehouseRequest;
+import ru.yandex.practicum.interaction.api.commerce.dto.warehouse.AddressDto;
+import ru.yandex.practicum.interaction.api.commerce.dto.warehouse.BookedProductsDto;
+import ru.yandex.practicum.interaction.api.commerce.dto.warehouse.NewProductInWarehouseRequest;
 import ru.yandex.practicum.warehouse.commerce.entity.WarehouseProduct;
 import ru.yandex.practicum.warehouse.commerce.exception.NoSpecifiedProductInWarehouseException;
 import ru.yandex.practicum.warehouse.commerce.exception.ProductInShoppingCartLowQuantityInWarehouse;
@@ -41,7 +44,7 @@ public class WarehouseService {
     }
 
     @Transactional
-    public BookedProductsDto checkAndReserveProducts(ShoppingCartDto shoppingCart) {
+    public BookedProductsDto checkAndReserveProducts(ru.yandex.practicum.interaction.api.commerce.dto.warehouse.ShoppingCartDto shoppingCart) {
         Map<UUID, Integer> products = shoppingCart.getProducts();
         validateProductsAvailability(products);
         DeliveryCalculationResult calculation = calculateDeliveryDetails(products);
