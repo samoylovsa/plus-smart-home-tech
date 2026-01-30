@@ -1,4 +1,4 @@
-package ru.yandex.practicum.store.commerce.entity.enums;
+package ru.yandex.practicum.interaction.api.commerce.dto.shoppingStore;
 
 public enum ProductCategory {
     LIGHTING,
