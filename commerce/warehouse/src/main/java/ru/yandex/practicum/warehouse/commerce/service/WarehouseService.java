@@ -8,9 +8,9 @@ import ru.yandex.practicum.interaction.api.commerce.dto.warehouse.AddressDto;
 import ru.yandex.practicum.interaction.api.commerce.dto.warehouse.BookedProductsDto;
 import ru.yandex.practicum.interaction.api.commerce.dto.warehouse.NewProductInWarehouseRequest;
 import ru.yandex.practicum.warehouse.commerce.entity.WarehouseProduct;
-import ru.yandex.practicum.warehouse.commerce.exception.NoSpecifiedProductInWarehouseException;
-import ru.yandex.practicum.warehouse.commerce.exception.ProductInShoppingCartLowQuantityInWarehouse;
-import ru.yandex.practicum.warehouse.commerce.exception.SpecifiedProductAlreadyInWarehouseException;
+import ru.yandex.practicum.interaction.api.commerce.exception.warehouse.NoSpecifiedProductInWarehouseException;
+import ru.yandex.practicum.interaction.api.commerce.exception.warehouse.ProductInShoppingCartLowQuantityInWarehouse;
+import ru.yandex.practicum.interaction.api.commerce.exception.warehouse.SpecifiedProductAlreadyInWarehouseException;
 import ru.yandex.practicum.warehouse.commerce.mapper.WarehouseMapper;
 import ru.yandex.practicum.warehouse.commerce.repository.WarehouseProductRepository;
 
@@ -45,7 +45,7 @@ public class WarehouseService {
 
     @Transactional
     public BookedProductsDto checkAndReserveProducts(ru.yandex.practicum.interaction.api.commerce.dto.warehouse.ShoppingCartDto shoppingCart) {
-        Map<UUID, Integer> products = shoppingCart.getProducts();
+        Map<UUID, Long> products = shoppingCart.getProducts();
         validateProductsAvailability(products);
         DeliveryCalculationResult calculation = calculateDeliveryDetails(products);
         return new BookedProductsDto(
@@ -76,16 +76,16 @@ public class WarehouseService {
                 .orElseThrow(() -> new NoSpecifiedProductInWarehouseException(productId));
     }
 
-    private void validateProductsAvailability(Map<UUID, Integer> products) {
-        for (Map.Entry<UUID, Integer> entry : products.entrySet()) {
+    private void validateProductsAvailability(Map<UUID, Long> products) {
+        for (Map.Entry<UUID, Long> entry : products.entrySet()) {
             UUID productId = entry.getKey();
-            Integer requestedQuantity = entry.getValue();
+            Long requestedQuantity = entry.getValue();
             WarehouseProduct product = findProductByIdOrThrow(productId);
             validateProductQuantity(product, requestedQuantity);
         }
     }
 
-    private void validateProductQuantity(WarehouseProduct product, Integer requestedQuantity) {
+    private void validateProductQuantity(WarehouseProduct product, Long requestedQuantity) {
         if (product.getQuantity() < requestedQuantity) {
             throw new ProductInShoppingCartLowQuantityInWarehouse(
                     product.getProductId(),
@@ -95,13 +95,13 @@ public class WarehouseService {
         }
     }
 
-    private DeliveryCalculationResult calculateDeliveryDetails(Map<UUID, Integer> products) {
+    private DeliveryCalculationResult calculateDeliveryDetails(Map<UUID, Long> products) {
         double totalWeight = 0.0;
         double totalVolume = 0.0;
         boolean hasFragile = false;
-        for (Map.Entry<UUID, Integer> entry : products.entrySet()) {
+        for (Map.Entry<UUID, Long> entry : products.entrySet()) {
             UUID productId = entry.getKey();
-            Integer quantity = entry.getValue();
+            Long quantity = entry.getValue();
             WarehouseProduct product = findProductByIdOrThrow(productId);
             totalWeight += calculateItemWeight(product, quantity);
             totalVolume += calculateItemVolume(product, quantity);
@@ -112,11 +112,11 @@ public class WarehouseService {
         return new DeliveryCalculationResult(totalWeight, totalVolume, hasFragile);
     }
 
-    private double calculateItemWeight(WarehouseProduct product, Integer quantity) {
+    private double calculateItemWeight(WarehouseProduct product, Long quantity) {
         return product.getWeight() * quantity;
     }
 
-    private double calculateItemVolume(WarehouseProduct product, Integer quantity) {
+    private double calculateItemVolume(WarehouseProduct product, Long quantity) {
         return product.getDimension().getVolume() * quantity;
     }
 

@@ -9,7 +9,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import ru.yandex.practicum.interaction.api.commerce.dto.warehouse.*;
 
 @FeignClient(name = "warehouse")
-public interface Warehouse {
+public interface WarehouseApi {
 
     @PutMapping("/api/v1/warehouse")
     ResponseEntity<Void> newProductInWarehouse(@RequestBody NewProductInWarehouseRequest request);

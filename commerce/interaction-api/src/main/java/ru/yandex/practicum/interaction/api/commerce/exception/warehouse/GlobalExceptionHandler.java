@@ -1,4 +1,4 @@
-package ru.yandex.practicum.warehouse.commerce.exception;
+package ru.yandex.practicum.interaction.api.commerce.exception.warehouse;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
