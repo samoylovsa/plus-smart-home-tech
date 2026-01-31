@@ -9,6 +9,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
+import ru.yandex.practicum.interaction.api.commerce.client.shoppingStore.ShoppingStoreApi;
 import ru.yandex.practicum.interaction.api.commerce.dto.shoppingStore.PageResponseDto;
 import ru.yandex.practicum.interaction.api.commerce.dto.shoppingStore.ProductDto;
 import ru.yandex.practicum.interaction.api.commerce.dto.shoppingStore.ProductCategory;
@@ -22,7 +23,7 @@ import java.util.UUID;
 @RestController
 @RequestMapping("/api/v1/shopping-store")
 @RequiredArgsConstructor
-public class ShoppingStoreController {
+public class ShoppingStoreController implements ShoppingStoreApi {
 
     private final ShoppingStoreService shoppingStoreService;
 
