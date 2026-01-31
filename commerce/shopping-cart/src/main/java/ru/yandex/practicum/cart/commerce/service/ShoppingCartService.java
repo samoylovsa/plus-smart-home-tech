@@ -1,14 +1,18 @@
 package ru.yandex.practicum.cart.commerce.service;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import ru.yandex.practicum.interaction.api.commerce.dto.shoppingCart.ChangeProductQuantityRequest;
-import ru.yandex.practicum.interaction.api.commerce.dto.shoppingCart.ShoppingCartDto;
 import ru.yandex.practicum.cart.commerce.entity.ShoppingCart;
-import ru.yandex.practicum.cart.commerce.exception.NoProductsInShoppingCartException;
 import ru.yandex.practicum.cart.commerce.mapper.ShoppingCartMapper;
 import ru.yandex.practicum.cart.commerce.repository.ShoppingCartRepository;
+import ru.yandex.practicum.interaction.api.commerce.client.warehouse.WarehouseApi;
+import ru.yandex.practicum.interaction.api.commerce.dto.shoppingCart.ChangeProductQuantityRequest;
+import ru.yandex.practicum.interaction.api.commerce.dto.shoppingCart.ShoppingCartDto;
+import ru.yandex.practicum.interaction.api.commerce.dto.warehouse.BookedProductsDto;
+import ru.yandex.practicum.interaction.api.commerce.exception.shoppingCart.NoProductsInShoppingCartException;
+import ru.yandex.practicum.interaction.api.commerce.exception.warehouse.ProductInShoppingCartLowQuantityInWarehouse;
 
 import java.util.HashMap;
 import java.util.List;
@@ -22,6 +26,7 @@ public class ShoppingCartService {
 
     private final ShoppingCartRepository shoppingCartRepository;
     private final ShoppingCartMapper shoppingCartMapper;
+    private final WarehouseApi warehouseClient;
 
     public ShoppingCartDto getShoppingCart(String username) {
         ShoppingCart shoppingCart = shoppingCartRepository
@@ -44,6 +49,7 @@ public class ShoppingCartService {
             currentProducts.put(productId, currentQuantity + quantity);
         });
         shoppingCart.setProducts(currentProducts);
+        checkProductQuantityEnoughForShoppingCart(shoppingCart);
         ShoppingCart savedCart = shoppingCartRepository.save(shoppingCart);
         return shoppingCartMapper.toDto(savedCart);
     }
@@ -106,5 +112,22 @@ public class ShoppingCartService {
         newCart.setActive(true);
         newCart.setProducts(new HashMap<>());
         return shoppingCartRepository.save(newCart);
+    }
+
+    private void checkProductQuantityEnoughForShoppingCart(ShoppingCart shoppingCart) {
+        ru.yandex.practicum.interaction.api.commerce.dto.warehouse.ShoppingCartDto shoppingCartDto =
+                new ru.yandex.practicum.interaction.api.commerce.dto.warehouse.ShoppingCartDto(
+                        shoppingCart.getShoppingCartId(),
+                        shoppingCart.getProducts()
+                );
+        ResponseEntity<BookedProductsDto> response = warehouseClient
+                .checkProductQuantityEnoughForShoppingCart(shoppingCartDto);
+        if (!response.getStatusCode().is2xxSuccessful()) {
+            throw new ProductInShoppingCartLowQuantityInWarehouse(
+                    String.format("Not enough product quantity in warehouse for shopping cart: %s",
+                            shoppingCart.getShoppingCartId()
+                    )
+            );
+        }
     }
 }

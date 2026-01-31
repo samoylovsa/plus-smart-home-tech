@@ -1,4 +1,4 @@
-package ru.yandex.practicum.store.commerce.exception;
+package ru.yandex.practicum.interaction.api.commerce.exception.shoppingStore;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
