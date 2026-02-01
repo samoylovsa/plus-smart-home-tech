@@ -11,8 +11,7 @@ import ru.yandex.practicum.interaction.api.commerce.client.warehouse.WarehouseAp
 import ru.yandex.practicum.interaction.api.commerce.dto.shoppingCart.ChangeProductQuantityRequest;
 import ru.yandex.practicum.interaction.api.commerce.dto.shoppingCart.ShoppingCartDto;
 import ru.yandex.practicum.interaction.api.commerce.dto.warehouse.BookedProductsDto;
-import ru.yandex.practicum.interaction.api.commerce.exception.shoppingCart.NoProductsInShoppingCartException;
-import ru.yandex.practicum.interaction.api.commerce.exception.warehouse.ProductInShoppingCartLowQuantityInWarehouse;
+import ru.yandex.practicum.cart.commerce.exception.NoProductsInShoppingCartException;
 
 import java.util.HashMap;
 import java.util.List;
@@ -123,7 +122,7 @@ public class ShoppingCartService {
         ResponseEntity<BookedProductsDto> response = warehouseClient
                 .checkProductQuantityEnoughForShoppingCart(shoppingCartDto);
         if (!response.getStatusCode().is2xxSuccessful()) {
-            throw new ProductInShoppingCartLowQuantityInWarehouse(
+            throw new NoProductsInShoppingCartException(
                     String.format("Not enough product quantity in warehouse for shopping cart: %s",
                             shoppingCart.getShoppingCartId()
                     )

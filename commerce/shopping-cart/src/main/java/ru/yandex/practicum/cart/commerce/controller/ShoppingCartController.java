@@ -8,13 +8,13 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
+import ru.yandex.practicum.cart.commerce.service.ShoppingCartService;
 import ru.yandex.practicum.interaction.api.commerce.client.shoppingCart.ShoppingCartApi;
-import ru.yandex.practicum.interaction.api.commerce.dto.shoppingCart.AddProductsRequest;
 import ru.yandex.practicum.interaction.api.commerce.dto.shoppingCart.ChangeProductQuantityRequest;
 import ru.yandex.practicum.interaction.api.commerce.dto.shoppingCart.ShoppingCartDto;
-import ru.yandex.practicum.cart.commerce.service.ShoppingCartService;
 
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 @Slf4j
@@ -27,7 +27,7 @@ public class ShoppingCartController implements ShoppingCartApi {
     private final ShoppingCartService shoppingCartService;
 
     @GetMapping
-    public ResponseEntity<ShoppingCartDto> getShoppingCart(@RequestParam @NotBlank String username) {
+    public ResponseEntity<ShoppingCartDto> getShoppingCart(@NotBlank @RequestParam String username) {
         log.info("GET /api/v1/shopping-cart");
         ShoppingCartDto cart = shoppingCartService.getShoppingCart(username);
         log.info("Received shopping cart: {} for {}", cart, username);
@@ -36,18 +36,18 @@ public class ShoppingCartController implements ShoppingCartApi {
 
     @PutMapping
     public ResponseEntity<ShoppingCartDto> addProductToShoppingCart(
-            @RequestParam @NotBlank String username,
-            @Valid @RequestBody AddProductsRequest request) {
+            @NotBlank @RequestParam String username,
+            @RequestBody Map<UUID, Long> productQuantities) {
         log.info("PUT /api/v1/shopping-cart");
-        ShoppingCartDto cart = shoppingCartService.addProductsToCart(username, request.getProductQuantities());
+        ShoppingCartDto cart = shoppingCartService.addProductsToCart(username, productQuantities);
         log.info("Successfully added products to cart for user: {}", username);
         return ResponseEntity.ok(cart);
     }
 
     @PostMapping("/remove")
     public ResponseEntity<ShoppingCartDto> removeFromShoppingCart(
-            @RequestParam @NotBlank String username,
-            @RequestBody @NotEmpty List<UUID> productIds) {
+            @NotBlank @RequestParam String username,
+            @NotEmpty @RequestBody List<UUID> productIds) {
         log.info("POST /api/v1/shopping-cart/remove");
         ShoppingCartDto cart = shoppingCartService.removeProductsFromCart(username, productIds);
         log.info("Successfully removed {} products from cart for user: {}", productIds.size(), username);
@@ -56,7 +56,7 @@ public class ShoppingCartController implements ShoppingCartApi {
 
     @PostMapping("/change-quantity")
     public ResponseEntity<ShoppingCartDto> changeProductQuantity(
-            @RequestParam @NotBlank String username,
+            @NotBlank @RequestParam String username,
             @Valid @RequestBody ChangeProductQuantityRequest request) {
         log.info("POST /api/v1/shopping-cart/change-quantity");
         ShoppingCartDto cart = shoppingCartService.changeProductQuantity(username, request);
@@ -65,7 +65,7 @@ public class ShoppingCartController implements ShoppingCartApi {
     }
 
     @DeleteMapping
-    public ResponseEntity<Void> deactivateCurrentShoppingCart(@RequestParam @NotBlank String username) {
+    public ResponseEntity<Void> deactivateCurrentShoppingCart(@NotBlank @RequestParam String username) {
         log.info("DELETE /api/v1/shopping-cart");
         shoppingCartService.deactivateShoppingCart(username);
         log.info("Successfully deactivated shopping cart for user: {}", username);
