@@ -1,5 +1,6 @@
 package ru.yandex.practicum.interaction.api.commerce.client.shoppingStore;
 
+import jakarta.validation.Valid;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
@@ -15,7 +16,7 @@ import java.util.UUID;
 public interface ShoppingStoreApi {
 
     @PutMapping("/api/v1/shopping-store")
-    ResponseEntity<ProductDto> createProduct(@RequestBody ProductDto productDto);
+    ResponseEntity<ProductDto> createProduct(@Valid @RequestBody ProductDto productDto);
 
     @GetMapping("/api/v1/shopping-store/{productId}")
     ResponseEntity<ProductDto> getProduct(@PathVariable UUID productId);
@@ -25,6 +26,9 @@ public interface ShoppingStoreApi {
             @RequestParam ProductCategory category,
             Pageable pageable
     );
+
+    @PostMapping
+    ResponseEntity<ProductDto> updateProduct(@Valid @RequestBody ProductDto productDto);
 
     @PostMapping("/api/v1/shopping-store/removeProductFromStore")
     ResponseEntity<Boolean> removeProduct(@RequestBody UUID productId);
