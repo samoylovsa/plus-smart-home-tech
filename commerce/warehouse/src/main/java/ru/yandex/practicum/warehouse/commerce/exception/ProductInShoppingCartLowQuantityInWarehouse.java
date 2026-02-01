@@ -1,17 +1,17 @@
 package ru.yandex.practicum.warehouse.commerce.exception;
 
 import org.springframework.http.HttpStatus;
-import org.springframework.web.bind.annotation.ResponseStatus;
+import ru.yandex.practicum.interaction.api.commerce.exception.ApiException;
 
 import java.util.UUID;
 
-@ResponseStatus(HttpStatus.BAD_REQUEST)
-public class ProductInShoppingCartLowQuantityInWarehouse extends RuntimeException {
+public class ProductInShoppingCartLowQuantityInWarehouse extends ApiException {
     public ProductInShoppingCartLowQuantityInWarehouse(UUID productId, Long requested, Long available) {
-        super("Product " + productId + ": requested " + requested + ", available " + available);
-    }
-
-    public ProductInShoppingCartLowQuantityInWarehouse(String message) {
-        super(message);
+        super(
+                String.format("Product with id '%d' not enough in warehouse", productId),
+                "Указанного продукта недостаточно на складе",
+                HttpStatus.NOT_FOUND,
+                "WAREHOUSE_PRODUCT_NOT_ENOUGH"
+        );
     }
 }

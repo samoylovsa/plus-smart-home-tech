@@ -1,13 +1,17 @@
 package ru.yandex.practicum.warehouse.commerce.exception;
 
 import org.springframework.http.HttpStatus;
-import org.springframework.web.bind.annotation.ResponseStatus;
+import ru.yandex.practicum.interaction.api.commerce.exception.ApiException;
 
 import java.util.UUID;
 
-@ResponseStatus(HttpStatus.BAD_REQUEST)
-public class NoSpecifiedProductInWarehouseException extends RuntimeException {
+public class NoSpecifiedProductInWarehouseException extends ApiException {
     public NoSpecifiedProductInWarehouseException(UUID productId) {
-        super("No information about product " + productId + " in warehouse");
+        super(
+                String.format("Product with id '%d' not found in warehouse", productId),
+                "Указанный продукт не найден на складе",
+                HttpStatus.NOT_FOUND,
+                "WAREHOUSE_PRODUCT_NOT_FOUND"
+        );
     }
 }
