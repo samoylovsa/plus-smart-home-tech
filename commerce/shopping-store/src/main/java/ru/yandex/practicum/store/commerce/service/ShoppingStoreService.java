@@ -72,11 +72,11 @@ public class ShoppingStoreService {
 
     private Product findActiveProductOrThrow(UUID productId) {
         return productRepository.findActiveById(productId)
-                .orElseThrow(() -> new ProductNotFoundException("Active product not found with ID: " + productId));
+                .orElseThrow(() -> new ProductNotFoundException(productId));
     }
 
     private Product findProductOrThrow(UUID productId) {
         return productRepository.findById(productId)
-                .orElseThrow(() -> new ProductNotFoundException("Product not found with ID: " + productId));
+                .orElseThrow(() -> new ProductNotFoundException(productId));
     }
 }

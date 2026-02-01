@@ -1,13 +1,17 @@
 package ru.yandex.practicum.warehouse.commerce.exception;
 
 import org.springframework.http.HttpStatus;
-import org.springframework.web.bind.annotation.ResponseStatus;
+import ru.yandex.practicum.interaction.api.commerce.exception.ApiException;
 
 import java.util.UUID;
 
-@ResponseStatus(HttpStatus.BAD_REQUEST)
-public class SpecifiedProductAlreadyInWarehouseException extends RuntimeException {
+public class SpecifiedProductAlreadyInWarehouseException extends ApiException {
     public SpecifiedProductAlreadyInWarehouseException(UUID productId) {
-        super("Product with ID " + productId + " is already in warehouse");
+        super(
+                String.format("Product '%s' already exists in warehouse", productId),
+                "Данный продукт уже существует на складе",
+                HttpStatus.BAD_REQUEST,
+                "WAREHOUSE_PRODUCT_ALREADY_EXISTS"
+        );
     }
 }

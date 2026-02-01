@@ -30,10 +30,7 @@ public class ShoppingCartService {
     public ShoppingCartDto getShoppingCart(String username) {
         ShoppingCart shoppingCart = shoppingCartRepository
                 .findByUsernameAndIsActiveTrue(username)
-                .orElseThrow(() -> new NoProductsInShoppingCartException(
-                        "Корзина для пользователя '" + username + "' не найдена. " +
-                                "Добавьте сначала товары в корзину."
-                ));
+                .orElseThrow(NoProductsInShoppingCartException::new);
         return shoppingCartMapper.toDto(shoppingCart);
     }
 
@@ -57,15 +54,13 @@ public class ShoppingCartService {
     public ShoppingCartDto removeProductsFromCart(String username, List<UUID> productIds) {
         ShoppingCart shoppingCart = shoppingCartRepository
                 .findByUsernameAndIsActiveTrue(username)
-                .orElseThrow(() -> new NoProductsInShoppingCartException("Корзина не найдена"));
+                .orElseThrow(NoProductsInShoppingCartException::new);
         Map<UUID, Long> currentProducts = shoppingCart.getProducts();
         List<UUID> missingProducts = productIds.stream()
                 .filter(productId -> !currentProducts.containsKey(productId))
                 .toList();
         if (!missingProducts.isEmpty()) {
-            throw new NoProductsInShoppingCartException(
-                    "Нет искомых товаров в корзине: " + missingProducts
-            );
+            throw new NoProductsInShoppingCartException();
         }
         productIds.forEach(currentProducts::remove);
         shoppingCart.setProducts(currentProducts);
@@ -77,14 +72,12 @@ public class ShoppingCartService {
     public ShoppingCartDto changeProductQuantity(String username, ChangeProductQuantityRequest request) {
         ShoppingCart shoppingCart = shoppingCartRepository
                 .findByUsernameAndIsActiveTrue(username)
-                .orElseThrow(() -> new NoProductsInShoppingCartException("Корзина не найдена"));
+                .orElseThrow(NoProductsInShoppingCartException::new);
         Map<UUID, Long> currentProducts = shoppingCart.getProducts();
         UUID productId = request.getProductId();
         Long newQuantity = request.getNewQuantity();
         if (!currentProducts.containsKey(productId)) {
-            throw new NoProductsInShoppingCartException(
-                    "Товар с ID " + productId + " не найден в корзине"
-            );
+            throw new NoProductsInShoppingCartException();
         }
         if (newQuantity <= 0) {
             currentProducts.remove(productId);
@@ -122,11 +115,7 @@ public class ShoppingCartService {
         ResponseEntity<BookedProductsDto> response = warehouseClient
                 .checkProductQuantityEnoughForShoppingCart(shoppingCartDto);
         if (!response.getStatusCode().is2xxSuccessful()) {
-            throw new NoProductsInShoppingCartException(
-                    String.format("Not enough product quantity in warehouse for shopping cart: %s",
-                            shoppingCart.getShoppingCartId()
-                    )
-            );
+            throw new NoProductsInShoppingCartException();
         }
     }
 }

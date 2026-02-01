@@ -1,12 +1,15 @@
 package ru.yandex.practicum.cart.commerce.exception;
 
 import org.springframework.http.HttpStatus;
-import org.springframework.web.bind.annotation.ResponseStatus;
+import ru.yandex.practicum.interaction.api.commerce.exception.ApiException;
 
-@ResponseStatus(HttpStatus.BAD_REQUEST)
-public class NoProductsInShoppingCartException extends RuntimeException {
-
-    public NoProductsInShoppingCartException(String message) {
-        super(message);
+public class NoProductsInShoppingCartException extends ApiException {
+    public NoProductsInShoppingCartException() {
+        super(
+                "No products in shopping cart",
+                "В корзине нет товаров",
+                HttpStatus.BAD_REQUEST,
+                "NO_PRODUCTS_IN_SHOPPING_CART"
+        );
     }
 }

@@ -1,12 +1,16 @@
 package ru.yandex.practicum.store.commerce.exception;
 
-public class ProductNotFoundException extends RuntimeException {
+import org.springframework.http.HttpStatus;import ru.yandex.practicum.interaction.api.commerce.exception.ApiException;
 
-    public ProductNotFoundException(String message) {
-        super(message);
-    }
+import java.util.UUID;
 
-    public ProductNotFoundException(String message, Throwable cause) {
-        super(message, cause);
+public class ProductNotFoundException extends ApiException {
+    public ProductNotFoundException(UUID productId) {
+        super(
+                String.format("Product with id '%d' not found", productId),
+                "Продукт не найден",
+                HttpStatus.NOT_FOUND,
+                "STORE_PRODUCT_NOT_FOUND"
+        );
     }
 }
