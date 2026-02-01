@@ -1,4 +1,4 @@
-package ru.yandex.practicum.interaction.api.commerce.exception.shoppingStore;
+package ru.yandex.practicum.store.commerce.exception;
 
 public class ProductNotFoundException extends RuntimeException {
 

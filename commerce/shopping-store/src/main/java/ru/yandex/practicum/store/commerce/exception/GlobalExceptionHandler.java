@@ -1,4 +1,4 @@
-package ru.yandex.practicum.interaction.api.commerce.exception.shoppingStore;
+package ru.yandex.practicum.store.commerce.exception;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -6,6 +6,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import ru.yandex.practicum.store.commerce.exception.ErrorResponse;
 
 import java.time.LocalDateTime;
 import java.util.HashMap;
