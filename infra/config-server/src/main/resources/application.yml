@@ -10,6 +10,7 @@ spring:
           searchLocations:
             - classpath:config/telemetry/{application}
             - classpath:config/commerce/{application}
+            - classpath:config/infra/{application}
 
 server:
   port: 0
@@ -21,3 +22,10 @@ eureka:
   instance:
     preferIpAddress: false
     hostname: localhost
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,env
+      base-path: /actuator
