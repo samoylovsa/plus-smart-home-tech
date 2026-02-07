@@ -11,6 +11,12 @@ spring:
             - Path=/shopping-cart/**
           filters:
             - PrefixPath=/api/v1
+        - id: shopping_store_service_route
+          uri: lb://SHOPPING-STORE
+          predicates:
+            - Path=/shopping-store/**
+          filters:
+            - PrefixPath=/api/v1
 
 server:
   port: 8080
