@@ -11,8 +11,8 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import ru.yandex.practicum.interaction.api.commerce.client.shoppingStore.ShoppingStoreApi;
 import ru.yandex.practicum.interaction.api.commerce.dto.shoppingStore.PageResponseDto;
-import ru.yandex.practicum.interaction.api.commerce.dto.shoppingStore.ProductDto;
 import ru.yandex.practicum.interaction.api.commerce.dto.shoppingStore.ProductCategory;
+import ru.yandex.practicum.interaction.api.commerce.dto.shoppingStore.ProductDto;
 import ru.yandex.practicum.interaction.api.commerce.dto.shoppingStore.QuantityState;
 import ru.yandex.practicum.store.commerce.service.ShoppingStoreService;
 

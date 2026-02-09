@@ -1,6 +1,7 @@
 package ru.yandex.practicum.store.commerce.exception;
 
-import org.springframework.http.HttpStatus;import ru.yandex.practicum.interaction.api.commerce.exception.ApiException;
+import org.springframework.http.HttpStatus;
+import ru.yandex.practicum.interaction.api.commerce.exception.ApiException;
 
 import java.util.UUID;
 

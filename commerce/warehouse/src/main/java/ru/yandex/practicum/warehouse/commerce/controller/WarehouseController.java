@@ -6,11 +6,11 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import ru.yandex.practicum.interaction.api.commerce.client.warehouse.WarehouseApi;
-import ru.yandex.practicum.interaction.api.commerce.dto.warehouse.AddProductToWarehouseRequest;
-import ru.yandex.practicum.interaction.api.commerce.dto.warehouse.AddressDto;
-import ru.yandex.practicum.interaction.api.commerce.dto.warehouse.BookedProductsDto;
-import ru.yandex.practicum.interaction.api.commerce.dto.warehouse.NewProductInWarehouseRequest;
+import ru.yandex.practicum.interaction.api.commerce.dto.warehouse.*;
 import ru.yandex.practicum.warehouse.commerce.service.WarehouseService;
+
+import java.util.Map;
+import java.util.UUID;
 
 @Slf4j
 @RestController
@@ -53,5 +53,28 @@ public class WarehouseController implements WarehouseApi {
         AddressDto address = warehouseService.getWarehouseAddress();
         log.info("Recieved address: {} for delivery", address);
         return ResponseEntity.ok(address);
+    }
+
+    @PostMapping("/shipped")
+    public ResponseEntity<Void> shippedToDelivery(
+            @Valid @RequestBody ShippedToDeliveryRequest request) {
+        log.info("POST /api/v1/warehouse/shipped");
+        warehouseService.registerDeliveryForOrder(request.getOrderId(), request.getDeliveryId());
+        return ResponseEntity.ok().build();
+    }
+
+    @PostMapping("/return")
+    public ResponseEntity<Void> acceptReturn(@RequestBody Map<UUID, Long> products) {
+        log.info("POST /api/v1/warehouse/return");
+        warehouseService.acceptReturn(products);
+        return ResponseEntity.ok().build();
+    }
+
+    @PostMapping("/assembly")
+    public ResponseEntity<BookedProductsDto> assemblyProductsForOrder(
+            @Valid @RequestBody AssemblyProductsForOrderRequest request) {
+        log.info("POST /api/v1/warehouse/assembly");
+        BookedProductsDto result = warehouseService.assemblyProductsForOrder(request);
+        return ResponseEntity.ok(result);
     }
 }
