@@ -5,13 +5,13 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.yandex.practicum.cart.commerce.entity.ShoppingCart;
+import ru.yandex.practicum.cart.commerce.exception.NoProductsInShoppingCartException;
 import ru.yandex.practicum.cart.commerce.mapper.ShoppingCartMapper;
 import ru.yandex.practicum.cart.commerce.repository.ShoppingCartRepository;
 import ru.yandex.practicum.interaction.api.commerce.client.warehouse.WarehouseApi;
 import ru.yandex.practicum.interaction.api.commerce.dto.shoppingCart.ChangeProductQuantityRequest;
 import ru.yandex.practicum.interaction.api.commerce.dto.shoppingCart.ShoppingCartDto;
 import ru.yandex.practicum.interaction.api.commerce.dto.warehouse.BookedProductsDto;
-import ru.yandex.practicum.cart.commerce.exception.NoProductsInShoppingCartException;
 
 import java.util.HashMap;
 import java.util.List;

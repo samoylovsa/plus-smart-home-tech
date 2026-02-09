@@ -3,15 +3,14 @@ package ru.yandex.practicum.warehouse.commerce.service;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import ru.yandex.practicum.interaction.api.commerce.dto.warehouse.AddProductToWarehouseRequest;
-import ru.yandex.practicum.interaction.api.commerce.dto.warehouse.AddressDto;
-import ru.yandex.practicum.interaction.api.commerce.dto.warehouse.BookedProductsDto;
-import ru.yandex.practicum.interaction.api.commerce.dto.warehouse.NewProductInWarehouseRequest;
+import ru.yandex.practicum.interaction.api.commerce.dto.warehouse.*;
+import ru.yandex.practicum.warehouse.commerce.entity.OrderDelivery;
 import ru.yandex.practicum.warehouse.commerce.entity.WarehouseProduct;
 import ru.yandex.practicum.warehouse.commerce.exception.NoSpecifiedProductInWarehouseException;
 import ru.yandex.practicum.warehouse.commerce.exception.ProductInShoppingCartLowQuantityInWarehouse;
 import ru.yandex.practicum.warehouse.commerce.exception.SpecifiedProductAlreadyInWarehouseException;
 import ru.yandex.practicum.warehouse.commerce.mapper.WarehouseMapper;
+import ru.yandex.practicum.warehouse.commerce.repository.OrderDeliveryRepository;
 import ru.yandex.practicum.warehouse.commerce.repository.WarehouseProductRepository;
 
 import java.security.SecureRandom;
@@ -23,6 +22,7 @@ import java.util.UUID;
 public class WarehouseService {
 
     private final WarehouseProductRepository repository;
+    private final OrderDeliveryRepository orderDeliveryRepository;
     private final WarehouseMapper mapper;
 
     private static final String[] ADDRESSES = new String[] {"ADDRESS_1", "ADDRESS_2"};
@@ -44,7 +44,7 @@ public class WarehouseService {
     }
 
     @Transactional
-    public BookedProductsDto checkAndReserveProducts(ru.yandex.practicum.interaction.api.commerce.dto.warehouse.ShoppingCartDto shoppingCart) {
+    public BookedProductsDto checkAndReserveProducts(ShoppingCartDto shoppingCart) {
         Map<UUID, Long> products = shoppingCart.getProducts();
         validateProductsAvailability(products);
         DeliveryCalculationResult calculation = calculateDeliveryDetails(products);
@@ -63,6 +63,55 @@ public class WarehouseService {
                 .house(CURRENT_ADDRESS)
                 .flat(CURRENT_ADDRESS)
                 .build();
+    }
+
+    @Transactional
+    public void registerDeliveryForOrder(UUID orderId, UUID deliveryId) {
+        orderDeliveryRepository.findById(orderId)
+                .ifPresentOrElse(
+                        orderDelivery -> {
+                            orderDelivery.setDeliveryId(deliveryId);
+                            orderDeliveryRepository.save(orderDelivery);
+                        },
+                        () -> orderDeliveryRepository.save(OrderDelivery.builder()
+                                .orderId(orderId)
+                                .deliveryId(deliveryId)
+                                .build())
+                );
+    }
+
+    @Transactional
+    public void acceptReturn(Map<UUID, Long> products) {
+        if (products == null || products.isEmpty()) {
+            return;
+        }
+        for (Map.Entry<UUID, Long> entry : products.entrySet()) {
+            WarehouseProduct product = findProductByIdOrThrow(entry.getKey());
+            product.addQuantity(entry.getValue());
+            repository.save(product);
+        }
+    }
+
+    @Transactional
+    public BookedProductsDto assemblyProductsForOrder(AssemblyProductsForOrderRequest request) {
+        Map<UUID, Long> products = request.getProducts();
+        validateProductsAvailability(products);
+        for (Map.Entry<UUID, Long> entry : products.entrySet()) {
+            WarehouseProduct product = findProductByIdOrThrow(entry.getKey());
+            validateProductQuantity(product, entry.getValue());
+            product.reduceQuantity(entry.getValue());
+            repository.save(product);
+        }
+        orderDeliveryRepository.save(OrderDelivery.builder()
+                .orderId(request.getOrderId())
+                .deliveryId(null)
+                .build());
+        DeliveryCalculationResult calculation = calculateDeliveryDetails(products);
+        return new BookedProductsDto(
+                calculation.totalWeight(),
+                calculation.totalVolume(),
+                calculation.hasFragile()
+        );
     }
 
     private void validateProductNotExists(UUID productId) {

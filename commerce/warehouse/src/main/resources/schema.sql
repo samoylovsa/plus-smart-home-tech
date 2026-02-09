@@ -9,3 +9,8 @@ CREATE TABLE IF NOT EXISTS warehouse.warehouse_products (
     depth DOUBLE PRECISION,
     weight DOUBLE PRECISION
 );
+
+CREATE TABLE IF NOT EXISTS warehouse.order_delivery (
+    order_id UUID PRIMARY KEY,
+    delivery_id UUID NOT NULL
+);
